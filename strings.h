@@ -73,10 +73,10 @@ public:
         return sf::String(this->c_str());
     }
 
-    // Ensure c_str() exists
+    
     const char* c_str() const {
-        // Return your internal char array
-        return Cs; // Assuming 'Cs' is your internal char*
+     
+        return Cs; 
     }
     /*
     operator sf::String() const {
