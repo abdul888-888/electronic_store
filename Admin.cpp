@@ -35,24 +35,23 @@ const sf::RectangleShape& Admin::getRemoveProductButton() const {
     return removeProductButton;
 }
 
-// Initialize GUI components
+
 void Admin::initGUI(sf::Font& font) {
-    // Setup admin title
-    adminTitle.setFont(font);
     
-    //adminTitle.setString( accessLevel + "Admin Dashboard - ");
+    adminTitle.setFont(font);
+ 
     adminTitle.setCharacterSize(24);
     adminTitle.setFillColor(sf::Color(0, 100, 200)); // Dark blue
     adminTitle.setPosition(20.f, 20.f);
 
-    // Setup add product button
+    
     addProductButton.setSize(sf::Vector2f(250.f, 50.f));
     addProductButton.setPosition(50.f, 100.f);
     addProductButton.setFillColor(sf::Color(50, 200, 50)); // Green
     addProductButton.setOutlineThickness(2.f);
     addProductButton.setOutlineColor(sf::Color::White);
 
-    // Setup remove product button
+ 
     removeProductButton.setSize(sf::Vector2f(250.f, 50.f));
     removeProductButton.setPosition(50.f, 170.f);
     removeProductButton.setFillColor(sf::Color(200, 50, 50)); // Red
@@ -60,17 +59,17 @@ void Admin::initGUI(sf::Font& font) {
     removeProductButton.setOutlineColor(sf::Color::White);
 }
 
-// Draw the admin dashboard
+//  admin dashboard
 void Admin::drawDashboard(sf::RenderWindow& window) {
-    // Draw background
+    
     sf::RectangleShape background(sf::Vector2f(window.getSize().x, window.getSize().y));
     background.setFillColor(sf::Color(240, 240, 245)); // Light gray-blue
     window.draw(background);
 
-    // Draw title
+    
     window.draw(adminTitle);
 
-    // Draw buttons
+   
     window.draw(addProductButton);
     window.draw(removeProductButton);
 
@@ -87,7 +86,7 @@ void Admin::drawDashboard(sf::RenderWindow& window) {
     removeLabel.setFillColor(sf::Color::White);
     window.draw(removeLabel);
 
-    // Draw user info from base class
+  
     user::drawDashboard(window);
 }
 
@@ -98,15 +97,13 @@ bool Admin::handleEvent(const sf::Event& event, Inventory& inventory) {
             static_cast<float>(event.mouseButton.y));
 
         if (addProductButton.getGlobalBounds().contains(mousePos)) {
-            // Handle add product action
             cout << "Add Product button clicked\n";
-            // You would typically open a product creation dialog here
-         
+        
         }
         else if (removeProductButton.getGlobalBounds().contains(mousePos)) {
-            // Handle remove product action
+         
             cout << "Remove Product button clicked\n";
-            // You would typically open a product selection dialog here
+            
         }
         return true;
     }
