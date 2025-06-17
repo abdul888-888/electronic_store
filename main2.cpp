@@ -1,4 +1,3 @@
-
 #include <SFML/Graphics.hpp>
 #include "user.h"
 #include "Product.h"
@@ -7,11 +6,12 @@
 #include "Customer.h"
 #include "Admin.h"
 #include <iostream>
+#include <sstream>
 #include "vectors.h"
 #include "strings.h"
 #include "LoginManager.h"
 
-// Function declarations
+
 void initializeSampleInventory(Inventory& inventory);
 void renderLoginScreen(sf::RenderWindow& window, const sf::Font& font);
 void renderMessage(sf::RenderWindow& window, const sf::Font& font, const std::string& message);
@@ -19,11 +19,11 @@ void renderProductDetails(sf::RenderWindow& window, const sf::Font& font, const 
 void renderCheckoutScreen(sf::RenderWindow& window, const sf::Font& font, const ShoppingCart& cart, const Inventory& inventory);
 
 int main() {
-    // Window setup
+   
     sf::RenderWindow window(sf::VideoMode(1024, 768), "Online Electronics Store");
     window.setFramerateLimit(60);
 
-    // Font loading with multiple fallbacks
+  
     sf::Font mainFont;
     const std::vector<std::string> fontPaths = {
         "arial.ttf",
@@ -41,25 +41,20 @@ int main() {
 
     if (!fontLoaded) {
         std::cerr << "Warning: Using default font\n";
-        
         mainFont.loadFromMemory(nullptr, 0);
     }
 
-   
     Inventory inventory;
     initializeSampleInventory(inventory);
 
-   
     Customer customer("moeed", "bscs", "000", Date(1, 1, 2023), Address());
     Admin admin("admin", "admin@", "123", Date(1, 1, 2020), Address(), "SuperAdmin");
 
-   
     customer.initGUI(mainFont);
     admin.initGUI(mainFont);
     ShoppingCart cart;
     cart.initGUI(mainFont);
 
-    // Application state
     enum class AppState {
         LOGIN,
         CUSTOMER_VIEW,
@@ -73,17 +68,16 @@ int main() {
     } currentState = AppState::LOGIN;
 
     user* currentUser = nullptr;
-    string statusMessage;
+    strings statusMessage; 
     LoginManager loginManager;
     loginManager.registerCustomer("moeed", "bscs", "000", Date(1, 1, 2023), Address());
     loginManager.registerAdmin("admin", "admin@", "123", Date(1, 1, 2020), Address(), "SuperAdmin");
-    // Additional UI state variables
+    
     Product* selectedProduct = nullptr;
     int selectedProductQuantity = 1;
     sf::Clock messageTimer;
     bool showMessage = false;
 
-    // Main loop
     while (window.isOpen()) {
         sf::Event event;
         while (window.pollEvent(event)) {
@@ -91,9 +85,9 @@ int main() {
                 window.close();
             }
 
-            // Handle text input for login
+           
             if (currentState == AppState::LOGIN && event.type == sf::Event::TextEntered) {
-                // Could implement text entry for username/password
+              
             }
 
             switch (currentState) {
@@ -101,23 +95,18 @@ int main() {
                 if (event.type == sf::Event::KeyPressed) {
                     if (event.key.code == sf::Keyboard::C) {
                         strings email, password;
-                        //cout << "Enter email: ";
-                        //cin >> email;
-                        //cout << "Enter password: ";
-                        //cin >> password;
                         email = "bscs";
                         password = "000";
-                      
                         currentUser = loginManager.login(email, password);
 
                         if (currentUser) {
                             currentState = AppState::CUSTOMER_VIEW;
-                            statusMessage = "Customer logged in";
+                            statusMessage = strings("Customer logged in");
                             showMessage = true;
                             messageTimer.restart();
                         }
                         else {
-                            statusMessage = "Login failed!";
+                            statusMessage = strings("Login failed!");
                             showMessage = true;
                             messageTimer.restart();
                         }
@@ -125,7 +114,7 @@ int main() {
                     else if (event.key.code == sf::Keyboard::A) {
                         currentUser = &admin;
                         currentState = AppState::ADMIN_VIEW;
-                        statusMessage = "Admin logged in";
+                        statusMessage = strings("Admin logged in");
                         showMessage = true;
                         messageTimer.restart();
                     }
@@ -142,7 +131,6 @@ int main() {
                         currentUser = nullptr;
                     }
                 }
-                
                 if (currentUser) {
                     static_cast<Customer*>(currentUser)->handleEvent(event);
                 }
@@ -158,7 +146,6 @@ int main() {
                         currentUser = nullptr;
                     }
                 }
-                
                 if (currentUser) {
                     static_cast<Admin*>(currentUser)->handleEvent(event, inventory);
                 }
@@ -173,53 +160,45 @@ int main() {
                         currentState = AppState::CUSTOMER_VIEW;
                     }
                 }
-                // Handle product selection
-              // Handle product selection
-           // Handle product selection event handling
-               
+                // Handle product selection and add to cart
                 if (event.type == sf::Event::MouseButtonPressed &&
                     event.mouseButton.button == sf::Mouse::Left) {
+                    std::cout << "Mouse clicked at: " << event.mouseButton.x << ", " << event.mouseButton.y << std::endl;
 
-                    
-                    cout << "Mouse clicked at: " << event.mouseButton.x << ", " << event.mouseButton.y << std::endl;
-
-                   
                     sf::Vector2f mousePos = window.mapPixelToCoords(
                         sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
-                  
+
                     const float itemWidth = 200.f;
                     const float itemHeight = 250.f;
                     const float padding = 20.f;
                     const float startX = 20.f;
                     const float startY = 100.f;
 
-                    
                     float x = startX;
                     float y = startY;
-                    bool productSelected = false;
 
-                   
                     try {
-                       const auto& products = inventory.listAllProducts();
-                        cout << "Checking " << products.size() << " products..." << std::endl;
+                        const auto& products = inventory.listAllProducts();
+                        std::cout << "Checking " << products.size() << " products..." << std::endl;
 
-                        for (auto& product : products) {
+                        for (const auto& product : products) {
                             sf::FloatRect productRect(x, y, itemWidth, itemHeight);
 
-                            // Debug product bounds
-                            cout << "Product at (" << x << "," << y << ") to ("
+                            std::cout << "Product at (" << x << "," << y << ") to ("
                                 << x + itemWidth << "," << y + itemHeight << ")" << std::endl;
 
                             if (productRect.contains(mousePos)) {
-                                cout << "Selected product: " << product.getName() << std::endl;
-                                selectedProduct = &product;
-                                selectedProductQuantity = 1;
-                                currentState = AppState::PRODUCT_DETAILS;
-                                productSelected = true;
+                                std::cout << "Adding product to cart: " << product.getName() << std::endl;
+                                cart.addItem(product.getId(), 1); // Add 1 unit to cart
+                                // Construct message using std::stringstream
+                                std::stringstream ss;
+                                ss << "Added " << product.getName() << " to cart";
+                                statusMessage = strings(ss.str().c_str()); // Convert to strings
+                                showMessage = true;
+                                messageTimer.restart();
                                 break;
                             }
 
-                           
                             x += itemWidth + padding;
                             if (x + itemWidth > window.getSize().x) {
                                 x = startX;
@@ -229,13 +208,11 @@ int main() {
                     }
                     catch (const std::exception& e) {
                         std::cerr << "Error accessing products: " << e.what() << std::endl;
-                    }
-
-                    if (!productSelected) {
-                        cout << "No product selected at (" << mousePos.x << "," << mousePos.y << ")" << std::endl;
+                        statusMessage = strings("Error adding product to cart");
+                        showMessage = true;
+                        messageTimer.restart();
                     }
                 }
-
                 break;
 
             case AppState::PRODUCT_DETAILS:
@@ -251,12 +228,11 @@ int main() {
                         if (selectedProductQuantity > 1) selectedProductQuantity--;
                     }
                     else if (event.key.code == sf::Keyboard::Enter) {
-                        // Add to cart
-                        strings quant = quant.IntToString(selectedProductQuantity);
                         if (selectedProduct) {
                             cart.addItem(selectedProduct->getId(), selectedProductQuantity);
-                          /*  statusMessage = "Added " + quant+
-                                " " + selectedProduct->getName() + " to cart";*/
+                            std::stringstream ss;
+                            ss << "Added " << selectedProductQuantity << " " << selectedProduct->getName() << " to cart";
+                            statusMessage = strings(ss.str().c_str());
                             showMessage = true;
                             messageTimer.restart();
                             currentState = AppState::PRODUCTS;
@@ -283,9 +259,8 @@ int main() {
                         currentState = AppState::CART;
                     }
                     else if (event.key.code == sf::Keyboard::Enter) {
-                        
                         currentState = AppState::ORDER_CONFIRMATION;
-                        statusMessage = "Order placed successfully!";
+                        statusMessage = strings("Order placed successfully!");
                         showMessage = true;
                         messageTimer.restart();
                     }
@@ -310,10 +285,8 @@ int main() {
             }
         }
 
-      
         window.clear(sf::Color(240, 240, 245));
 
-        
         switch (currentState) {
         case AppState::LOGIN:
             renderLoginScreen(window, mainFont);
@@ -332,8 +305,10 @@ int main() {
         case AppState::PRODUCTS:
         {
             inventory.drawProductGrid(window, 20.f, 100.f, mainFont);
-            std::string message = "Press C to view cart (" + std::to_string(cart.getItems().size()) +
-                " items) | ESC to go back";
+            // Construct message using std::stringstream
+            std::stringstream ss;
+            ss << "Press C to view cart (" << cart.getItems().size() << " items) | ESC to go back";
+            std::string message = ss.str();
             renderMessage(window, mainFont, message);
         }
         break;
@@ -341,9 +316,9 @@ int main() {
         case AppState::PRODUCT_DETAILS:
             if (selectedProduct) {
                 renderProductDetails(window, mainFont, *selectedProduct);
-                renderMessage(window, mainFont,
-                    "+/- to change quantity (Qty: " + std::to_string(selectedProductQuantity) +
-                    ") | Enter to add to cart | ESC to go back");
+                std::stringstream ss;
+                ss << "+/- to change quantity (Qty: " << selectedProductQuantity << ") | Enter to add to cart | ESC to go back";
+                renderMessage(window, mainFont, ss.str());
             }
             break;
 
@@ -369,7 +344,7 @@ int main() {
             break;
 
         case AppState::ADMIN_PRODUCT_MGMT:
-            {
+        {
             sf::Text title("Product Management", mainFont, 36);
             title.setFillColor(sf::Color(30, 30, 120));
             title.setPosition(350.f, 50.f);
@@ -379,10 +354,12 @@ int main() {
         break;
         }
 
-        
         if (showMessage) {
             if (messageTimer.getElapsedTime().asSeconds() < 3.0f) {
-                renderMessage(window, mainFont, statusMessage);
+            
+                std::stringstream ss;
+                ss << statusMessage;
+                renderMessage(window, mainFont, ss.str());
             }
             else {
                 showMessage = false;
@@ -397,7 +374,7 @@ int main() {
 
 void initializeSampleInventory(Inventory& inventory) {
     inventory.addProduct(Product(strings("P100"), strings("iPhone 15"), strings("Latest model"), 699.99, strings("smartphone"), strings("apple"), 50));
-    inventory.addProduct(Product(strings("P200"), strings("EliteBook"), strings("16GB RAM"), 1299.99, strings("laptop"), strings("hp"), 30));
+    inventory.addProduct(Product(strings("P200"), strings("EliteBook"), strings("16GB RAM"), 699.99, strings("laptop"), strings("hp"), 30));
     inventory.addProduct(Product(strings("P300"), strings("AirPods Pro"), strings("Noise cancelling"), 199.99, strings("airpods"), strings("audionic"), 100));
     inventory.addProduct(Product(strings("P400"), strings("iPad Pro"), strings("M1 chip"), 799.99, strings("tablet"), strings("apple"), 40));
     inventory.addProduct(Product(strings("P500"), strings("Galaxy S23"), strings("Android flagship"), 899.99, strings("smartphone"), strings("samsung"), 60));
@@ -423,7 +400,6 @@ void renderMessage(sf::RenderWindow& window, const sf::Font& font, const std::st
 }
 
 void renderProductDetails(sf::RenderWindow& window, const sf::Font& font, const Product& product) {
-    // Background
     sf::RectangleShape background(sf::Vector2f(600.f, 400.f));
     background.setPosition(200.f, 150.f);
     background.setFillColor(sf::Color::White);
@@ -431,25 +407,24 @@ void renderProductDetails(sf::RenderWindow& window, const sf::Font& font, const 
     background.setOutlineColor(sf::Color(200, 200, 200));
     window.draw(background);
 
-    // Product name
     sf::Text name(product.getName(), font, 28);
     name.setFillColor(sf::Color::Black);
     name.setPosition(220.f, 170.f);
     window.draw(name);
-    int pr=product.getPrice();
-    strings price = price.IntToString(pr);
-    // Product details
-    sf::Text details("Price: $" + price + "\n" +
-        "Category: " + product.getCategory() + "\n" +
-        "Brand: " + product.getCompany() + "\n" +
-        "Description: " + product.getDescription(), font, 18);
+
+    int pr = product.getPrice();
+    std::stringstream ss;
+    ss << "Price: $" << pr << "\n"
+        << "Category: " << product.getCategory() << "\n"
+        << "Brand: " << product.getCompany() << "\n"
+        << "Description: " << product.getDescription();
+    sf::Text details(ss.str(), font, 18);
     details.setFillColor(sf::Color(70, 70, 70));
     details.setPosition(220.f, 220.f);
     window.draw(details);
 }
 
 void renderCheckoutScreen(sf::RenderWindow& window, const sf::Font& font, const ShoppingCart& cart, const Inventory& inventory) {
-    // Background 
     sf::RectangleShape background(sf::Vector2f(600.f, 400.f));
     background.setPosition(200.f, 150.f);
     background.setFillColor(sf::Color::White);
@@ -457,21 +432,18 @@ void renderCheckoutScreen(sf::RenderWindow& window, const sf::Font& font, const 
     background.setOutlineColor(sf::Color(200, 200, 200));
     window.draw(background);
 
-    // Title
     sf::Text title("Checkout", font, 28);
     title.setFillColor(sf::Color::Black);
     title.setPosition(220.f, 170.f);
     window.draw(title);
 
-    // List items
     float yPos = 220.f;
     for (const auto& item : cart.getItems()) {
         const Product* product = inventory.getProduct(item.productId);
-        strings q = q.IntToString(item.quantity);
-        strings P=P.IntToString(product->getPrice() * item.quantity);
         if (product) {
-            sf::Text itemText(product->getName() + " x " + q+
-                " - $" + P, font, 16);
+            std::stringstream ss;
+            ss << product->getName() << " x " << item.quantity << " - $" << (product->getPrice() * item.quantity);
+            sf::Text itemText(ss.str(), font, 16);
             itemText.setFillColor(sf::Color(70, 70, 70));
             itemText.setPosition(220.f, yPos);
             window.draw(itemText);
@@ -479,16 +451,15 @@ void renderCheckoutScreen(sf::RenderWindow& window, const sf::Font& font, const 
         }
     }
 
-    // Total
-    sf::Text totalText("Total: $" + std::to_string(cart.getTotal(inventory)), font, 20);
+    std::stringstream ss;
+    ss << "Total: $" << cart.getTotal(inventory);
+    sf::Text totalText(ss.str(), font, 20);
     totalText.setFillColor(sf::Color(0, 100, 0));
     totalText.setPosition(220.f, yPos + 20.f);
     window.draw(totalText);
 
-    // Payment prompt
     sf::Text paymentPrompt("Press Enter to confirm order", font, 18);
     paymentPrompt.setFillColor(sf::Color(70, 70, 70));
     paymentPrompt.setPosition(220.f, yPos + 60.f);
     window.draw(paymentPrompt);
 }
-
