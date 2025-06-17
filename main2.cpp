@@ -189,11 +189,10 @@ int main() {
 
                             if (productRect.contains(mousePos)) {
                                 std::cout << "Adding product to cart: " << product.getName() << std::endl;
-                                cart.addItem(product.getId(), 1); // Add 1 unit to cart
-                                // Construct message using std::stringstream
+                                cart.addItem(product.getId(), 1); 
                                 std::stringstream ss;
                                 ss << "Added " << product.getName() << " to cart";
-                                statusMessage = strings(ss.str().c_str()); // Convert to strings
+                                statusMessage = strings(ss.str().c_str()); 
                                 showMessage = true;
                                 messageTimer.restart();
                                 break;
